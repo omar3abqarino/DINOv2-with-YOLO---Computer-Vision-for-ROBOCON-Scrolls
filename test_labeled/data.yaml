@@ -1,0 +1,5 @@
+names:
+- box
+nc: 1
+train: C:\Users\a\Desktop\Coding\M.I.A\DINOv2-with-YOLO---Computer-Vision-for-ROBOCON-Scrolls\test_labeled/train/images
+val: C:\Users\a\Desktop\Coding\M.I.A\DINOv2-with-YOLO---Computer-Vision-for-ROBOCON-Scrolls\test_labeled/valid/images
