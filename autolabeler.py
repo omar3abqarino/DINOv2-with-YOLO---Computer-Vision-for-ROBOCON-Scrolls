@@ -26,6 +26,7 @@ METADATA_PATH = "crops_metadata.json"
 # METADATA_PATH = os.path.join(CROPS_DIR, METADATA_FILE)
 TEMPLATES_DIR = "templates"
 LABELS_DIR = "labels"
+SIMILARITY_THRESHOLD = 0.65
 
 os.makedirs(LABELS_DIR, exist_ok=True)
 
@@ -71,14 +72,23 @@ for img_name, data in metadata.items():
         if not os.path.exists(CROP_PATH):
             continue
 
-
+        #L2-normalization to make sum of their squares = 1; it is easier on hardware
         crop_embedding = F.normalize(get_embedding(CROP_PATH), p=2, dim=1)
 
+        #continuing the cosine similarity by just doing the dot product
         similarities = crop_embedding @ template_tensor.T
 
 
-        best_match_idx = torch.argmax(similarities).item()
-        best_class_id = class_tensor[best_match_idx].item()
+        best_score, best_match_idx = torch.max(similarities, dim=1)
+        best_score = best_score.item()
+
+        if best_score < SIMILARITY_THRESHOLD:
+            print(f"  [REJECTED] Not a valid scroll (Score: {best_score:.3f})")
+            continue  # skips because it is neither real nor fake
+
+
+
+        best_class_id = class_tensor[best_match_idx.item()].item()
 
         x1, y1, x2, y2 = box["x1"], box["y1"], box["x2"], box["y2"]
         cx = ((x1 + x2) / 2) / og_width
