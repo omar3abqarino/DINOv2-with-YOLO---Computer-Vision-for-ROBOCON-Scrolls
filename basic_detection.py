@@ -4,11 +4,11 @@ from autodistill_grounding_dino import GroundingDINO
 from autodistill.detection import CaptionOntology
 
 
-# TRAIN_DIR = "Dataset\\train\\images"
-# VAL_DIR = "Dataset\\val\\images"
-# TEST_DIR = "Dataset\\test\\images"
-# INPUT_DIRS = [TRAIN_DIR, VAL_DIR, TEST_DIR]
-INPUT_DIRS = ["test"]
+TRAIN_DIR = "Dataset\\train\\images"
+VAL_DIR = "Dataset\\val\\images"
+TEST_DIR = "Dataset\\test\\images"
+INPUT_DIRS = [TRAIN_DIR, VAL_DIR, TEST_DIR]
+
 CROPS_DIR = "D:\\crops"
 METADATA_FILE = "crops_metadata.json"
 PADDING = 7
