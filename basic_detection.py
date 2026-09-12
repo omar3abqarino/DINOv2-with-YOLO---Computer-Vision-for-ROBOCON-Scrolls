@@ -1,4 +1,4 @@
-import os, json, time
+import os, json, time, gc, torch
 import cv2 as cv
 from autodistill_grounding_dino import GroundingDINO
 from autodistill.detection import CaptionOntology
@@ -11,6 +11,7 @@ INPUT_DIRS = [TRAIN_DIR, VAL_DIR, TEST_DIR]
 
 CROPS_DIR = "D:\\crops"
 METADATA_FILE = "crops_metadata.json"
+METADATA_PATH = os.path.join(CROPS_DIR, METADATA_FILE)
 PADDING = 7
 
 os.makedirs(CROPS_DIR, exist_ok=True)
@@ -24,28 +25,41 @@ print("Scanning images for boxes.")
 
 start = time.time()
 count = 0
+metadata = {}
 
 
 for INPUT_DIR in INPUT_DIRS:
-    metadata = {}
+    if not os.path.exists(INPUT_DIR):
+        print("Skipping non-existent directory.")
+        continue
+
+    split = os.path.basename(os.path.dirname(INPUT_DIR))
+    target_crop_dir = os.path.join(CROPS_DIR, split)
+    os.makedirs(target_crop_dir, exist_ok=True)
+
     for img_name in os.listdir(INPUT_DIR):
         if not img_name.lower().endswith(('.jpg', '.png', '.jpeg')): 
             continue
             
         img_path = os.path.join(INPUT_DIR, img_name)
-        image_cv = cv.imread(img_path)
-        
+        try:
+            image_cv = cv.imread(img_path)
+        except:
+            print(f"Pic failed {img_name}")
         if image_cv is None:
             continue
             
         img_h, img_w, _ = image_cv.shape
         
-        
-        detections = box_detector.predict(img_path)
+        try:
+            detections = box_detector.predict(img_path)
+        except:
+            print(f"Pic failed {img_name}")
         
         metadata[img_name] = {
             "img_w": img_w,
             "img_h": img_h,
+            "split": split,
             "boxes": []
         }
         
@@ -68,24 +82,25 @@ for INPUT_DIR in INPUT_DIRS:
             new_name = ".".join(arr)
             
             crop_filename = f"{new_name}_crop_{idx}.jpg"
-            crop_path = os.path.join(CROPS_DIR, INPUT_DIR, crop_filename)
+            crop_path = os.path.join(target_crop_dir, crop_filename)
             
             
             cv.imwrite(crop_path, crop_cv)
             
+            rel_crop_path = os.path.join(split, crop_filename)
+            metadata[img_name]["boxes"].append({"crop_filename": rel_crop_path, "x1": x1, "y1": y1, "x2": x2, "y2": y2})
             
-            metadata[img_name]["boxes"].append({"crop_filename": crop_filename, "x1": x1, "y1": y1, "x2": x2, "y2": y2})
-            count += 1
+        count += 1
+
+
+        with open(METADATA_PATH, "w") as f:
+            json.dump(metadata, f, indent=4)
     print(f"{INPUT_DIR} is Done")
 
-    METADATA_PATH = os.path.join(CROPS_DIR, INPUT_DIR, METADATA_FILE)
-
-    with open(METADATA_PATH, "w") as f:
-        json.dump(metadata, f, indent=4)
-
-    time.sleep(5)
+    
 end = time.time()
 
 
 print("Done")
-print(f"avg per img: {(end-start)/count} seconds")
+if count > 0:
+    print(f"avg per img: {(end-start)/count} seconds")
