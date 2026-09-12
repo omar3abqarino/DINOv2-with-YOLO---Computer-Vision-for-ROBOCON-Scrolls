@@ -19,9 +19,11 @@ def get_embedding(img_path):
 
 
 
-CROPS_DIR = "D:\\crops"
+# CROPS_DIR = "D:\\crops"
+CROPS_DIR = "crops"
 METADATA_FILE = "crops_metadata.json"
-METADATA_PATH = os.path.join(CROPS_DIR, METADATA_FILE)
+METADATA_PATH = "crops_metadata.json"
+# METADATA_PATH = os.path.join(CROPS_DIR, METADATA_FILE)
 TEMPLATES_DIR = "templates"
 LABELS_DIR = "labels"
 
@@ -61,6 +63,7 @@ with open(METADATA_PATH, "r") as f:
 for img_name, data in metadata.items():
     og_width = data["img_w"]
     og_height = data["img_h"]
+    yolo_lines = []
 
 
     for box in data["boxes"]:
@@ -82,3 +85,20 @@ for img_name, data in metadata.items():
         cy = ((y1 + y2) / 2) / og_height
         w = (x2 - x1) / og_width
         h = (y2 - y1) / og_height
+
+
+
+        yolo_lines.append(f"{best_class_id} {cx:.6f} {cy:.6f} {w:.6f} {h:.6f}")
+
+
+    if yolo_lines:
+        arr = img_name.split(".", -1)[:-1]
+        new_name = ".".join(arr) + ".txt"
+
+        with open(os.path.join(LABELS_DIR, new_name), "w") as f:
+            f.write("\n".join(yolo_lines))
+
+    print("Done labeling for this image :)")
+
+
+print("Donnnnneeeee")

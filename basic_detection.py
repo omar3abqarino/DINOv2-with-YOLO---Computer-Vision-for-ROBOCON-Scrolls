@@ -18,7 +18,7 @@ os.makedirs(CROPS_DIR, exist_ok=True)
 
 box_detector = GroundingDINO(ontology=CaptionOntology({"cardboard box": "box"}))
 
-metadata = {}
+
 
 print("Scanning images for boxes.")
 
@@ -27,6 +27,7 @@ count = 0
 
 
 for INPUT_DIR in INPUT_DIRS:
+    metadata = {}
     for img_name in os.listdir(INPUT_DIR):
         if not img_name.lower().endswith(('.jpg', '.png', '.jpeg')): 
             continue
@@ -67,7 +68,7 @@ for INPUT_DIR in INPUT_DIRS:
             new_name = ".".join(arr)
             
             crop_filename = f"{new_name}_crop_{idx}.jpg"
-            crop_path = os.path.join(CROPS_DIR, crop_filename)
+            crop_path = os.path.join(CROPS_DIR, INPUT_DIR, crop_filename)
             
             
             cv.imwrite(crop_path, crop_cv)
@@ -76,10 +77,15 @@ for INPUT_DIR in INPUT_DIRS:
             metadata[img_name]["boxes"].append({"crop_filename": crop_filename, "x1": x1, "y1": y1, "x2": x2, "y2": y2})
             count += 1
     print(f"{INPUT_DIR} is Done")
+
+    METADATA_PATH = os.path.join(CROPS_DIR, INPUT_DIR, METADATA_FILE)
+
+    with open(METADATA_PATH, "w") as f:
+        json.dump(metadata, f, indent=4)
+
     time.sleep(5)
 end = time.time()
-with open(METADATA_FILE, "w") as f:
-    json.dump(metadata, f, indent=4)
+
 
 print("Done")
 print(f"avg per img: {(end-start)/count} seconds")
