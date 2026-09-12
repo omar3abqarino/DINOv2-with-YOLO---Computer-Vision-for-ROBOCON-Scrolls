@@ -19,8 +19,9 @@ def get_embedding(img_path):
 
 
 
-METADATA_FILE = "crops_metadata.json"
 CROPS_DIR = "D:\\crops"
+METADATA_FILE = "crops_metadata.json"
+METADATA_PATH = os.path.join(CROPS_DIR, METADATA_FILE)
 TEMPLATES_DIR = "templates"
 LABELS_DIR = "labels"
 
@@ -49,7 +50,35 @@ for i in range(1, 16):
     class_ids.append(1)
 
 
-template_tensor = torch.cat(template_embeddings, dim = 0).to(device)
+template_tensor = F.normalize(torch.cat(template_embeddings, dim = 0).to(device), p=2, dim=1)
 class_tensor = torch.tensor(class_ids).to(device)
 
 
+with open(METADATA_PATH, "r") as f:
+    metadata = json.load(f)
+
+
+for img_name, data in metadata.items():
+    og_width = data["img_w"]
+    og_height = data["img_h"]
+
+
+    for box in data["boxes"]:
+        CROP_PATH = os.path.join(CROPS_DIR, box["crop_filename"])
+        if not os.path.exists(CROP_PATH):
+            continue
+
+
+        crop_embedding = F.normalize(get_embedding(CROP_PATH), p=2, dim=1)
+
+        similarities = crop_embedding @ template_tensor.T
+
+
+        best_match_idx = torch.argmax(similarities).item()
+        best_class_id = class_tensor[best_match_idx].item()
+
+        x1, y1, x2, y2 = box["x1"], box["y1"], box["x2"], box["y2"]
+        cx = ((x1 + x2) / 2) / og_width
+        cy = ((y1 + y2) / 2) / og_height
+        w = (x2 - x1) / og_width
+        h = (y2 - y1) / og_height
