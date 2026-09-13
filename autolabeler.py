@@ -130,7 +130,8 @@ for img_name, data in metadata.items():
     crop_embeddings = get_embeddings_batch(crop_paths)
     crop_embeddings = F.normalize(crop_embeddings.to(device), p=2, dim=1)
 
-
+    #sklearn has no gpu backend
+    crop_embeddings = crop_embeddings.cpu().numpy()
     pred_ids = clf.predict(crop_embeddings)
     pred_probabilities = clf.predict_proba(crop_embeddings)
 
