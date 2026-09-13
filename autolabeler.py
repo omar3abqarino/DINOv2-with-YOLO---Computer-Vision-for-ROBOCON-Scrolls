@@ -196,4 +196,12 @@ for img_name, data in metadata.items():
     torch.cuda.empty_cache()
 
 
+if to_review:
+    with open("TBV", "w"):
+        f.write("cropfilename--predicted_class--confidence")
+        f.write("\n".join(to_review))
+
 print("Donnnnneeeee")
+print(f"Total labeled: {total_labeled}")
+print(f"Total junk skipped: {total_skipped_junk}")
+print(f"Total low confidence: {total_skipped_lowconf}")
