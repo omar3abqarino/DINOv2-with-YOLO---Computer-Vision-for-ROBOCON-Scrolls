@@ -146,8 +146,9 @@ for img_name, data in metadata.items():
         #to manual review
         if confidence < THRESHOLD:
             print(f"LOW CONFIDENCE :( {box["crop_filename"]}    {class_name}   confidence: {confidence}")
-            to_review.append(f"LOW CONFIDENCE :( {box["crop_filename"]}    {class_name}   confidence: {confidence}")
+            to_review.append(f"LOW CONFIDENCE :( {box['crop_filename']}-----{class_name}-----confidence: {confidence}")
             total_skipped_lowconf += 1
+            continue
     #continuing the cosine similarity by just doing the dot product
     # similarities = crop_embeddings @ template_tensor.T
 
@@ -197,7 +198,7 @@ for img_name, data in metadata.items():
 
 
 if to_review:
-    with open("TBV", "w"):
+    with open("TBV", "w") as f:
         f.write("cropfilename--predicted_class--confidence")
         f.write("\n".join(to_review))
 
