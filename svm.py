@@ -6,6 +6,7 @@ from PIL import Image
 from transformers import AutoImageProcessor, AutoModel
 from sklearn.svm import SVC
 from sklearn.model_selection import train_test_split
+from sklearn.model_selection import StratifiedKFold, cross_val_predict
 from sklearn.metrics import classification_report, confusion_matrix
 
 
@@ -69,21 +70,22 @@ embeddings = get_embeddings_batch(img_paths)
 embeddings = F.normalize(embeddings, p=2, dim=1).numpy()
 
 
-X_train, X_val, y_train, y_val = train_test_split(embeddings, labels, test_size=TEST_SIZE, random_state=RANDOM_STATE, stratify=labels)
+# X_train, X_val, y_train, y_val = train_test_split(embeddings, labels, test_size=TEST_SIZE, random_state=RANDOM_STATE, stratify=labels)
 
+skf = StratifiedKFold(n_splits=10, shuffle=True, random_state=RANDOM_STATE)
+cv_clf = SVC(kernel="linear", C=1.0, probability=True, random_state=RANDOM_STATE)
+cv_preds = cross_val_predict(cv_clf, embeddings, labels, cv=skf)
+# val_clf = SVC(kernel="linear", C=1.0, probability=True, random_state=RANDOM_STATE)
+# val_clf.fit(X_train, y_train)
 
-val_clf = SVC(kernel="linear", C=1.0, probability=True, random_state=RANDOM_STATE)
-val_clf.fit(X_train, y_train)
-
-val_preds = val_clf.predict(X_val)
+# val_preds = val_clf.predict(X_val)
 print("\n--- Holdout validation report ---")
-print(classification_report(y_val, val_preds, target_names=CLASSES))
+print(classification_report(labels, cv_preds, target_names=CLASSES))
 print("Confusion matrix (rows=true, cols=pred):")
-print(confusion_matrix(y_val, val_preds))
+print(confusion_matrix(labels, cv_preds))
 print("----------------------------------\n")
 
-
-
+#refitting without val; only train
 final_clf = SVC(kernel="linear", C=1.0, probability=True, random_state=RANDOM_STATE)
 final_clf.fit(embeddings, labels)
 
