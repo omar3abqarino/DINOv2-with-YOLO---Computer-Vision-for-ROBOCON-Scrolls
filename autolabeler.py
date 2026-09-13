@@ -36,15 +36,15 @@ def get_embeddings_batch(img_paths, batch_size=16):
 
 
 
-CROPS_DIR = "D:\\crops"
+CROPS_DIR = "D:\\crops2"
 # CROPS_DIR = "crops"
-METADATA_FILE = "crops_metadata.json"
+METADATA_FILE = "crops_metadata2.json"
 # METADATA_PATH = "crops_metadata.json"
 METADATA_PATH = os.path.join(CROPS_DIR, METADATA_FILE)
 TEMPLATES_DIR = "new_templates"
 DATASET_BASE = "Dataset"
 PKL_PATH = "svm_classifier.pkl"
-THRESHOLD = 0.80
+THRESHOLD = 0.75
 
 
 
@@ -146,7 +146,7 @@ for img_name, data in metadata.items():
 
         #to manual review
         if confidence < THRESHOLD:
-            print(f"LOW CONFIDENCE :( {box["crop_filename"]}    {class_name}   confidence: {confidence}")
+            print(f"LOW CONFIDENCE :( {box['crop_filename']}    {class_name}   confidence: {confidence}")
             to_review.append(f"LOW CONFIDENCE :( {box['crop_filename']}-----{class_name}-----confidence: {confidence}")
             total_skipped_lowconf += 1
             continue

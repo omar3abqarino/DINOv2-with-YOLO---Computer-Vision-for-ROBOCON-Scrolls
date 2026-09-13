@@ -4,13 +4,13 @@ from autodistill_grounding_dino import GroundingDINO
 from autodistill.detection import CaptionOntology
 
 
-TRAIN_DIR = "Dataset\\train\\images"
-VAL_DIR = "Dataset\\val\\images"
-TEST_DIR = "Dataset\\test\\images"
+TRAIN_DIR = "Robocon.v1-1.0.yolov11\\train\\images"
+VAL_DIR = "Robocon.v1-1.0.yolov11\\valid\\images"
+TEST_DIR = "Robocon.v1-1.0.yolov11\\test\\images"
 INPUT_DIRS = [TRAIN_DIR, VAL_DIR, TEST_DIR]
 
-CROPS_DIR = "D:\\crops"
-METADATA_FILE = "crops_metadata.json"
+CROPS_DIR = "D:\\crops2"
+METADATA_FILE = "crops_metadata2.json"
 METADATA_PATH = os.path.join(CROPS_DIR, METADATA_FILE)
 PADDING = 7
 
